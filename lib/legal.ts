@@ -4,8 +4,8 @@ import { siteConfig } from "@/lib/site";
  * Versions of the legal documents. Bump the date when the text changes materially; sign-up stores the
  * version each user accepted, so you can tell who has seen which terms.
  */
-export const LEGAL_VERSION = "2026-09-28";
-export const LEGAL_UPDATED = "28 September 2026";
+export const LEGAL_VERSION = "2026-001";
+export const LEGAL_UPDATED = "September 2026";
 /** Minimum age to create an account: the highest digital-consent age in the EU (GDPR Art. 8), above COPPA's 13. */
 export const MINIMUM_AGE = 16;
 

@@ -292,7 +292,7 @@ export default function PrivacyPage() {
             </li>
           </ul>
           <p>
-            To make a request, email <a href={`mailto:${op.email}`}>{op.email}</a> from your account&apos;s
+            To make a request, open an issue here <a href={`mailto:${op.email}`}>{op.email}</a> from your account&apos;s
             address, or through an authorized agent where the law allows. We may need to verify your identity.
             We respond within the time the law sets (for example, one month under GDPR and UK GDPR, 45 days
             under the CCPA, and 15 days under the LGPD). Requests are free unless they are manifestly

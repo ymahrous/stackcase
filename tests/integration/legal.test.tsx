@@ -19,7 +19,7 @@ describe("legal pages", () => {
     const out = html(<Page />);
     expect(out.match(/<h1/g)).toHaveLength(1);
     expect(out).toContain('"@type":"BreadcrumbList"');
-    expect(out).toContain("28 September 2026");
+    expect(out).toContain("September 2026");
     const anchors = [...out.matchAll(/href="#([a-z-]+)"/g)].map((m) => m[1]!);
     expect(anchors.length).toBeGreaterThan(3);
     for (const id of anchors) expect(out, id).toContain(`id="${id}"`);

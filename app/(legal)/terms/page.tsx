@@ -107,7 +107,7 @@ export default function TermsPage() {
             <li>create accounts automatically or in bulk.</li>
           </ul>
           <p>
-            Found a security issue? Please report it privately to{" "}
+            Found a security issue? Please report it privately at issues here{" "}
             <a href={`mailto:${op.email}`}>{op.email}</a>. We won&apos;t pursue good-faith research that
             follows this policy and doesn&apos;t harm users or data.
           </p>
@@ -120,7 +120,7 @@ export default function TermsPage() {
       body: (
         <>
           <p>
-            Anyone can report content they believe is illegal or infringes their rights by emailing{" "}
+            Anyone can report content they believe is illegal or infringes their rights by opening a GitHub issue at{" "}
             <a href={`mailto:${op.email}`}>{op.email}</a> with:
           </p>
           <ol>

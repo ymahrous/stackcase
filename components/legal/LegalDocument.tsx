@@ -91,7 +91,7 @@ export function Contact({ operator }: { operator: Operator }) {
     <>
       <b>{operator.name}</b>
       <br />
-      Email: <a href={`mailto:${operator.email}`}>{operator.email}</a>
+      Open an issue here: <a href={`mailto:${operator.email}`}>{operator.email}</a>
     </>
   );
 }
