@@ -41,7 +41,7 @@ Built with Next.js 16 (App Router), React 19, TypeScript, Prisma 7, Postgres, Re
   - **Change username**, with a live availability check. The old link permanently redirects for 30 days, and nobody else can claim the old name during that time. Changes are limited to once every 7 days, and each one is confirmed by email.
   - **Change password.** Other devices are signed out and you get an email notice.
   - **Delete account.** Everything is deleted and you get a confirmation email.
-  - **Download my data.** A JSON export of everything stored about you (GDPR Art. 15/20, CCPA right to know, LGPD), without password or token hashes.
+  - **Download my data.** A JSON export of everything stored about you (the access and portability rights found in data protection laws worldwide), without password or token hashes.
 
 ### Public portfolios (`/<username>`)
 
@@ -97,7 +97,7 @@ emails/
 - **Consistent design** that matches the site: the Stackcase logo, one clear call to action, a fallback link for clients that block buttons, a facts table for security notices (what changed, old and new values, time in UTC), and a highlighted "Wasn't you?" note.
 - **Built for mail clients.** Table layout with inline styles, a 560 px container, and a bulletproof button that also renders in Outlook. Dark-mode colors apply in Apple Mail and other clients that support `prefers-color-scheme`.
 - **Accessible and deliverable.** Every email has `lang`, inbox preview text, a real heading, WCAG AA contrast, a plain-text part generated from the same template (the header and duplicate link are left out of it), and a footer that says why it was sent.
-- **Legal footer** on every email: `© <year> Stackcase. All rights reserved.`, links to Privacy and Terms, and a Help link when `LEGAL_CONTACT_EMAIL` is set.
+- **Legal footer** on every email: `© <year> Stackcase. All rights reserved.`, links to Privacy and Terms, and a Help link to the GitHub issues. There is no support email address.
 - **Safe by default.** React escapes all user text (names, usernames), and every link points at `NEXT_PUBLIC_SITE_URL`.
 - **Pure and previewable.** Templates receive the site details as props, so they don't depend on the app. `lib/email/templates.tsx` renders them to HTML and text with `@react-email/render`.
 
@@ -115,15 +115,25 @@ To add an email: create `emails/MyEmail.tsx` with a default-exported component, 
 - **Confirmation** happens on a button press, not on page load, because email security scanners open links automatically.
 - **Reset requests** get the same response whether or not the account exists, and are rate-limited per IP and per address.
 
-### Important: sending to real users needs a domain you own
+### Sender: always Resend's `onboarding@resend.dev`
 
-Resend only delivers to other people from a **domain you have verified in Resend**. Without one, the fallback sender `onboarding@resend.dev` can only email the address that owns your Resend account ([Resend docs](https://resend.com/docs/knowledge-base/403-error-resend-dev-domain)). You can't verify `vercel.app`.
+Every email is sent from `Stackcase <onboarding@resend.dev>` (`EMAIL_SENDER` in `lib/email/config.ts`), Resend's shared default sender, so no domain has to be verified and there is no sender setting.
 
-To send to users:
+**Its limitation:** Resend delivers mail from `onboarding@resend.dev` **only to the email address that owns your Resend account**. Any other recipient is rejected with a 403, "You can only send testing emails to your own email address" ([Resend docs](https://resend.com/docs/knowledge-base/403-error-resend-dev-domain)). In practice:
 
-1. Buy any domain, even a cheap one used only for email. The site can stay on `stackcase.vercel.app`.
-2. In Resend, go to **Domains**, add it (for example `mail.yourdomain.com`), and add the DNS records it shows.
-3. Set `EMAIL_FROM="Stackcase <hello@mail.yourdomain.com>"`.
+- Sign-up, username and deletion emails to other people are dropped. The app keeps working (sends never throw), and each refusal is logged as `email.rejected` with Resend's reason.
+- **Password reset only works for the Resend account owner.** Everyone else sees the usual "check your inbox" message, but no email arrives. Email confirmation is optional, so unconfirmed users can still publish.
+- Mail from the shared `resend.dev` domain is more likely to land in spam.
+
+If emails don't arrive, check in this order:
+
+1. **`RESEND_API_KEY` is set for the environment you're testing** (Vercel scopes variables to Production, Preview and Development separately) and you **redeployed** after changing it. Without a key, production skips every email and logs `email.skipped`.
+2. **The recipient is your Resend account's own address.** Anyone else gets the 403 above.
+3. **The API key can send from `resend.dev`.** A key restricted to one of your own domains can't use the shared sender; create one with _Sending access_ for all domains, or _Full access_.
+4. **Your Resend plan's quota and rate limit** haven't been reached (see the Resend dashboard → Logs, which also shows each rejection).
+5. **`NEXT_PUBLIC_SITE_URL`** is the real origin; otherwise emails arrive with links to the wrong site.
+
+To reach every user later, verify a domain you own in Resend (**Domains**, then add the DNS records it shows; you can't verify `vercel.app`) and change `EMAIL_SENDER` to an address on it.
 
 ### Transports
 
@@ -169,14 +179,24 @@ After changing the mark, run `npm run brand:assets` to regenerate the PNG and SV
 
 ## Analytics, performance and observability
 
-| Tool                                                                            | What it does here                                                                                                                                                                                                                                                                                       |
-| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Vercel Web Analytics](https://vercel.com/docs/analytics)                       | Page views, referrers and countries, without cookies. URLs are cleaned in the browser first (`lib/telemetry.ts`): query strings are dropped except `ref` and `utm_*`, and the password-reset and email-confirmation pages, whose links carry secrets, aren't recorded at all.                           |
-| Custom events (`lib/events.ts`)                                                 | Server-side funnel events: `signup_completed`, `email_confirmed`, `portfolio_published`, `username_changed`, `account_deleted`. No personal data in properties. They run after the response is sent and only on Vercel; custom events need a Vercel plan that includes them.                            |
-| [Vercel Speed Insights](https://vercel.com/docs/speed-insights)                 | Core Web Vitals (LCP, INP, CLS) from real visitors, per route, with the same URL redaction.                                                                                                                                                                                                             |
-| [Vercel Observability](https://vercel.com/docs/observability) and OpenTelemetry | `instrumentation.ts` registers `@vercel/otel` (service `stackcase`), so request and function traces show in Observability and any OpenTelemetry-compatible tool. Server logs are one JSON object per line (`lib/log.ts`: `email.sent`, `email.failed`, `after.failed`...), easy to filter and alert on. |
+| Tool                                                                            | What it does here                                                                                                                                                                                                                                                                                                                                |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Vercel Web Analytics](https://vercel.com/docs/analytics)                       | Page views, referrers and countries, without cookies, and only after the visitor allows it (see "Cookie consent" below). URLs are cleaned in the browser first (`lib/telemetry.ts`): query strings are dropped except `ref` and `utm_*`, and the password-reset and email-confirmation pages, whose links carry secrets, aren't recorded at all. |
+| Custom events (`lib/events.ts`)                                                 | Server-side funnel events: `signup_completed`, `email_confirmed`, `portfolio_published`, `username_changed`, `account_deleted`. No personal data in properties. They run after the response is sent and only on Vercel; custom events need a Vercel plan that includes them.                                                                     |
+| [Vercel Speed Insights](https://vercel.com/docs/speed-insights)                 | Core Web Vitals (LCP, INP, CLS) from real visitors, per route, with the same consent check and URL redaction.                                                                                                                                                                                                                                    |
+| [Vercel Observability](https://vercel.com/docs/observability) and OpenTelemetry | `instrumentation.ts` registers `@vercel/otel` (service `stackcase`), so request and function traces show in Observability and any OpenTelemetry-compatible tool. Server logs are one JSON object per line (`lib/log.ts`: `email.sent`, `email.failed`, `after.failed`...), easy to filter and alert on.                                          |
 
 To turn them on: in the Vercel project, open **Analytics** and **Speed Insights** and click **Enable**, then redeploy. Observability is on by default for every project. Nothing is collected in development or tests. The CSP allows only same-origin scripts in production, and Vercel serves the analytics scripts from your own domain under `/_vercel/`.
+
+### Cookie consent
+
+Analytics and Speed Insights don't load until the visitor allows them. On Vercel (`process.env.VERCEL`), a small non-modal panel at the bottom of the page asks once, with **Decline** and **Allow analytics** given equal weight and a link to the cookie section of the Privacy Policy.
+
+- The answer is kept for 180 days in a first-party cookie, `analytics_consent` (`granted` or `denied`), then the panel asks again (`lib/consent.ts`).
+- A browser's Global Privacy Control signal counts as a refusal, and the panel isn't shown.
+- **Cookie settings** in the footer of platform pages reopens the panel, and **Settings → Cookies and analytics** in the dashboard has an on/off switch for the same choice (`AnalyticsConsentToggle`). Every analytics event is checked against the cookie before it's sent, so withdrawing consent takes effect immediately, without a reload.
+- The server always renders the page without the panel, so static pages stay static and hydration never mismatches (`components/telemetry/`).
+- Server-side custom events (`lib/events.ts`) carry no personal data and no browser identifiers, so they don't depend on the cookie.
 
 ---
 
@@ -184,35 +204,45 @@ To turn them on: in the Vercel project, open **Analytics** and **Speed Insights*
 
 `/privacy`, `/terms` and `/accessibility` are linked from every footer (platform pages, dashboard, auth pages, 404s and every public portfolio), are in the sitemap and are marked up with `WebPage` + `BreadcrumbList` JSON-LD. They are written in plain language, with a summary box and a table of contents, and print cleanly.
 
-| Area             | What's covered                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Privacy          | Controller identity, data table with purposes and legal bases (GDPR Art. 6), processors (Vercel, your database host, Resend), international transfers, a retention table, rights and how to use them, and region-specific sections: EEA/UK/Switzerland, US states (CCPA/CPRA categories, no sale or sharing), Canada, Brazil (LGPD), Egypt and the Middle East, Asia-Pacific (APPI, PIPA, PDPA, DPDP, PIPL) and Africa (POPIA, NDPA). |
-| Cookies          | One strictly necessary session cookie, so no consent banner is needed under the ePrivacy Directive; analytics is cookieless.                                                                                                                                                                                                                                                                                                          |
-| Terms            | Eligibility (16+), content license, acceptable use, an EU Digital Services Act notice-and-action process with statements of reasons and appeals, DMCA §512 notices and counter-notices, consumer-law carve-outs in the disclaimers and liability limits, and international governing law (the UNIDROIT Principles of International Commercial Contracts) that keeps consumers' home-country protections and courts.                   |
-| Accessibility    | WCAG 2.2 AA target with an honest "partially conformant" status, what is tested, known limitations, a feedback route with a response time, and enforcement bodies (EAA, UK, ADA, AODA, Australia).                                                                                                                                                                                                                                    |
-| Product features | Required consent checkbox at sign-up (version and time stored), data export in Settings, account deletion with confirmation email, username rules for impersonation.                                                                                                                                                                                                                                                                  |
+They are written for a **worldwide** audience: one policy for everyone, no region-specific sections, no local representatives, and no country's law chosen for the Terms.
 
-**Stackcase is the legal name** used throughout: the operator and data controller in the Privacy Policy, the party to the Terms, the `legalName` and copyright holder in structured data, and the copyright line on every page and email (`© <year> Stackcase. All rights reserved.`). No postal address is published. The only required setting is `LEGAL_CONTACT_EMAIL` (or `EMAIL_REPLY_TO`); until one is set, each legal page shows a notice that contact details are incomplete. The pages are static, so redeploy after changing it. When you change a document materially, update `LEGAL_VERSION` and `LEGAL_UPDATED` in `lib/legal.ts`; the governing law is `GOVERNING_LAW` in the same file.
+**Contact is GitHub only; there is no contact email.** Questions, privacy requests, content reports and accessibility feedback go to [the repository's issues](https://github.com/ymahrous/stackcase/issues). Security reports and anything that mustn't be public go to GitHub's [private vulnerability reporting](https://github.com/ymahrous/stackcase/security/advisories/new), which is also the `Contact` in `/.well-known/security.txt`. Every page that asks people to open an issue warns that issues are public. The repository URL is `brand.repository` in `lib/brand.ts`; the links are built in `contactLinks` in `lib/legal.ts`.
 
-> **These texts are a well-researched starting point, not legal advice.** Have a lawyer in your jurisdiction review them before launch, especially these choices: a contract can't be governed by international principles alone in every country (courts may apply a national law instead, and EU law lets consumers rely on their home law), and some countries require a registered legal entity and a postal address for online services, for example an imprint in Germany and Austria. Also check whether you need EU/UK representatives, and anything specific to how you run the service.
+> **Turn on private vulnerability reporting** in the GitHub repository (**Settings → Code security → Private vulnerability reporting**). Until you do, the private-report links on the legal pages and in `security.txt` lead to a page visitors can't use.
+
+| Area             | What's covered                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Privacy          | Controller identity with a statement that the service isn't directed at any one country, contact through GitHub with a public-issue warning, a data table with purposes and legal bases, processors (Vercel, your database host, Resend) and GitHub as a separate controller, transfers, a retention table, rights given to everyone and how to use them, and one "Wherever you live" section in place of per-region sections.                                  |
+| Cookies          | A table of the two cookies: the strictly necessary session cookie, and `analytics_consent`, which records the visitor's choice. Analytics are cookieless and run only with consent; Global Privacy Control counts as a refusal.                                                                                                                                                                                                                                 |
+| Terms            | Eligibility (16+, or higher where local law says so), content license, acceptable use, a notice-and-action process through GitHub with statements of reasons and appeals, copyright notices that cover the DMCA's requirements, consumer-law carve-outs, a "not directed at any country" disclaimer, and international governing law (the UNIDROIT Principles of International Commercial Contracts) that keeps consumers' home-country protections and courts. |
+| Accessibility    | WCAG 2.2 AA target with an honest "partially conformant" status, what is tested, known limitations, a feedback route through GitHub with a response time, and a pointer to the local authority.                                                                                                                                                                                                                                                                 |
+| Product features | Required consent checkbox at sign-up (version and time stored), data export in Settings, account deletion with confirmation email, username rules for impersonation.                                                                                                                                                                                                                                                                                            |
+
+**Stackcase is the legal name** used throughout: the operator and data controller in the Privacy Policy, the party to the Terms, the `legalName` and copyright holder in structured data, and the copyright line on every page and email (`© <year> Stackcase. All rights reserved.`). No postal address or email address is published, and the legal pages need no settings. `LEGAL_DATABASE_PROVIDER` and `LEGAL_BACKUP_RETENTION_DAYS` fill in details; the pages are static, so redeploy after changing them. When you change a document materially, update `LEGAL_VERSION` and `LEGAL_UPDATED` in `lib/legal.ts`; the governing law is `GOVERNING_LAW` in the same file.
+
+> **These texts are a well-researched starting point, not legal advice.** Have a lawyer in your jurisdiction review them before launch, especially these choices: a contract can't be governed by international principles alone in every country (courts may apply a national law instead, and EU law lets consumers rely on their home law), and some countries require a registered legal entity and a postal address for online services, for example an imprint in Germany and Austria. Also check:
+>
+> - **Representatives.** The texts name no EU or UK representative. Removing the setting doesn't remove the duty: if you offer the service to people in the EU or UK from outside them, GDPR Art. 27 and UK GDPR Art. 27 may still require one.
+> - **GitHub-only contact.** People without a GitHub account can't reach you directly, and some laws expect an easy electronic contact point (for example GDPR Art. 12 or the EU Digital Services Act's single point of contact). Issues are public, so the pages tell people not to post personal data there.
+> - **Analytics consent.** Asking before cookieless analytics is the cautious reading of ePrivacy-style rules; keep the banner if you add any other measurement.
+>
+> And anything specific to how you run the service.
 
 ---
 
 ## Environment variables
 
-| Variable                                             | Required                               | Example                                                               |
-| ---------------------------------------------------- | -------------------------------------- | --------------------------------------------------------------------- |
-| `DATABASE_URL`                                       | yes                                    | `postgresql://…`                                                      |
-| `NEXT_PUBLIC_SITE_URL`                               | yes; production builds fail without it | `https://stackcase.vercel.app`                                        |
-| `RESEND_API_KEY`                                     | for email                              | `re_…` from [resend.com/api-keys](https://resend.com/api-keys)        |
-| `EMAIL_FROM`                                         | to reach users                         | `Stackcase <hello@mail.yourdomain.com>` (a verified Resend domain)    |
-| `EMAIL_REPLY_TO`                                     | no                                     | `support@yourdomain.com`                                              |
-| `NEXT_PUBLIC_APP_NAME`                               | no                                     | Overrides the brand name                                              |
-| `SECURITY_CONTACT`                                   | no                                     | `mailto:security@yourdomain.com` (serves `/.well-known/security.txt`) |
-| `LEGAL_CONTACT_EMAIL`                                | before launch                          | `privacy@yourdomain.com` (falls back to `EMAIL_REPLY_TO`)             |
-| `LEGAL_EU_REPRESENTATIVE`, `LEGAL_UK_REPRESENTATIVE` | if outside the EU/UK                   | Name and address of your GDPR Art. 27 representative                  |
-| `LEGAL_DATABASE_PROVIDER`                            | no                                     | `Neon Inc. (USA)`                                                     |
-| `LEGAL_BACKUP_RETENTION_DAYS`                        | no (default 30)                        | `7`                                                                   |
+| Variable                      | Required                               | Example                                                                                        |
+| ----------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                | yes                                    | `postgresql://…`                                                                               |
+| `NEXT_PUBLIC_SITE_URL`        | yes; production builds fail without it | `https://stackcase.vercel.app`                                                                 |
+| `RESEND_API_KEY`              | for email                              | `re_…` from [resend.com/api-keys](https://resend.com/api-keys), able to send from `resend.dev` |
+| `EMAIL_REPLY_TO`              | no                                     | A Reply-To header on account emails; never shown on the site                                   |
+| `NEXT_PUBLIC_APP_NAME`        | no                                     | Overrides the brand name                                                                       |
+| `LEGAL_DATABASE_PROVIDER`     | no                                     | `Neon Inc. (USA)`                                                                              |
+| `LEGAL_BACKUP_RETENTION_DAYS` | no (default 30)                        | `7`                                                                                            |
+
+No longer read, so delete them from your host: `EMAIL_FROM` (the sender is always `onboarding@resend.dev`), `LEGAL_CONTACT_EMAIL` and `SECURITY_CONTACT` (contact is through GitHub), and `LEGAL_EU_REPRESENTATIVE` / `LEGAL_UK_REPRESENTATIVE`.
 
 Every absolute URL comes from `NEXT_PUBLIC_SITE_URL`: canonical tags, sitemap, Open Graph, JSON-LD, email links and portfolio addresses.
 
@@ -233,10 +263,11 @@ npm run dev                  # http://localhost:3000, portfolios at http://local
 
 1. Create a Postgres database (Neon, Supabase, Vercel Postgres).
 2. Import the repository into Vercel. Name the project `stackcase`, or rename the production domain under **Settings → Domains** to `stackcase.vercel.app` if it's free.
-3. Set the environment variables: `DATABASE_URL`, `NEXT_PUBLIC_SITE_URL=https://stackcase.vercel.app`, `RESEND_API_KEY`, `EMAIL_FROM` and `LEGAL_CONTACT_EMAIL`.
-4. Enable **Analytics** and **Speed Insights** in the project.
-5. Deploy. `vercel-build` runs `prisma migrate deploy` and then `next build`.
-6. Submit `https://stackcase.vercel.app/sitemap.xml` in Google Search Console and Bing Webmaster Tools.
+3. Set the environment variables: `DATABASE_URL`, `NEXT_PUBLIC_SITE_URL=https://stackcase.vercel.app` and `RESEND_API_KEY`, for Production and Preview.
+4. Enable **Analytics** and **Speed Insights** in the project. They load only for visitors who allow them in the cookie banner.
+5. In the GitHub repository, turn on **Settings → Code security → Private vulnerability reporting**; the legal pages and `security.txt` link to it.
+6. Deploy. `vercel-build` runs `prisma migrate deploy` and then `next build`.
+7. Submit `https://stackcase.vercel.app/sitemap.xml` in Google Search Console and Bing Webmaster Tools.
 
 ---
 
@@ -280,7 +311,7 @@ The migrations add `CHECK` constraints for the username format, lowercase emails
 | Data integrity     | Database `CHECK` constraints enforce the username format and lowercase emails. Deleting an account cascades to everything it owns.                                                                                                                                                                                                                                               |
 | Secrets            | `RESEND_API_KEY` and `DATABASE_URL` are server-only (never `NEXT_PUBLIC_`). `.env*.local` is gitignored. In production, emails are never logged.                                                                                                                                                                                                                                 |
 | Dependencies       | `npm audit` reports 0 vulnerabilities. `package.json` overrides pin patched versions of `deepmerge-ts` and `mysql2`, which the Prisma CLI pulls in.                                                                                                                                                                                                                              |
-| Disclosure         | Set `SECURITY_CONTACT` to serve `/.well-known/security.txt` (RFC 9116).                                                                                                                                                                                                                                                                                                          |
+| Disclosure         | `/.well-known/security.txt` (RFC 9116) points researchers to GitHub's private vulnerability reporting on the repository.                                                                                                                                                                                                                                                         |
 
 ### Accepted trade-offs
 

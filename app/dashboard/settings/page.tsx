@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { DeleteAccountForm, PasswordForm, UsernameForm } from "@/components/dashboard/SettingsForms";
+import { AnalyticsConsentToggle } from "@/components/telemetry/AnalyticsConsentToggle";
 import { nextUsernameChangeAt } from "@/lib/account";
 import { requireUser } from "@/lib/auth/session";
 import { siteConfig } from "@/lib/site";
@@ -49,6 +50,22 @@ export default async function SettingsPage() {
         <a className="btn" href="/dashboard/export" download>
           Download your data
         </a>
+      </section>
+      <section className="ui-card" aria-labelledby="cookies-h">
+        <h2 id="cookies-h">Cookies and analytics</h2>
+        {/* Analytics exist only on Vercel (see app/layout.tsx); elsewhere there's nothing to switch. */}
+        {process.env.VERCEL ? (
+          <>
+            <p>
+              Choose whether we may count your visits and measure page speed. It&apos;s anonymous and sets no
+              cookies; your choice is saved in this browser and applies straight away. See{" "}
+              <Link href="/privacy#cookies">Cookies</Link> in the Privacy Policy.
+            </p>
+            <AnalyticsConsentToggle />
+          </>
+        ) : (
+          <p>This site doesn&apos;t collect analytics, so there&apos;s nothing to switch on or off.</p>
+        )}
       </section>
       <section className="ui-card danger-zone" aria-labelledby="delete-h">
         <h2 id="delete-h">Delete account</h2>

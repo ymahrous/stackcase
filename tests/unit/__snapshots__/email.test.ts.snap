@@ -21,7 +21,7 @@ Copies in backups expire on their normal schedule, as described in our Privacy P
 
 This is the last email you'll receive from Stackcase about this account.
 
-stackcase.test https://stackcase.test/ · Privacy https://stackcase.test/privacy · Terms https://stackcase.test/terms
+stackcase.test https://stackcase.test/ · Privacy https://stackcase.test/privacy · Terms https://stackcase.test/terms · Help https://github.com/ymahrous/stackcase/issues
 
 © 2026 Stackcase. All rights reserved."
 `;
@@ -49,7 +49,7 @@ Reset my password https://stackcase.test/forgot-password
 
 You're receiving this security notice because it concerns your Stackcase account.
 
-stackcase.test https://stackcase.test/ · Privacy https://stackcase.test/privacy · Terms https://stackcase.test/terms
+stackcase.test https://stackcase.test/ · Privacy https://stackcase.test/privacy · Terms https://stackcase.test/terms · Help https://github.com/ymahrous/stackcase/issues
 
 © 2026 Stackcase. All rights reserved."
 `;
@@ -69,7 +69,7 @@ This link works for 60 minutes and can be used once. Didn't ask for this? You ca
 
 You're receiving this because a password reset was requested for your Stackcase account.
 
-stackcase.test https://stackcase.test/ · Privacy https://stackcase.test/privacy · Terms https://stackcase.test/terms
+stackcase.test https://stackcase.test/ · Privacy https://stackcase.test/privacy · Terms https://stackcase.test/terms · Help https://github.com/ymahrous/stackcase/issues
 
 © 2026 Stackcase. All rights reserved."
 `;
@@ -107,7 +107,7 @@ Wasn't you? Someone may have access to your account. Reset your password https:/
 
 You're receiving this because the username on your Stackcase account changed.
 
-stackcase.test https://stackcase.test/ · Privacy https://stackcase.test/privacy · Terms https://stackcase.test/terms
+stackcase.test https://stackcase.test/ · Privacy https://stackcase.test/privacy · Terms https://stackcase.test/terms · Help https://github.com/ymahrous/stackcase/issues
 
 © 2026 Stackcase. All rights reserved."
 `;
@@ -127,7 +127,7 @@ This link works for 24 hours and can be used once. If you didn't create an accou
 
 You're receiving this because this address was used to create a Stackcase account.
 
-stackcase.test https://stackcase.test/ · Privacy https://stackcase.test/privacy · Terms https://stackcase.test/terms
+stackcase.test https://stackcase.test/ · Privacy https://stackcase.test/privacy · Terms https://stackcase.test/terms · Help https://github.com/ymahrous/stackcase/issues
 
 © 2026 Stackcase. All rights reserved."
 `;

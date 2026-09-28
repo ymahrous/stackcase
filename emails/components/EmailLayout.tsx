@@ -130,10 +130,10 @@ export function EmailLayout({ site, preview, heading, children, reason }: Layout
               <Link className="sc-muted" href={link(site, "/terms")} style={footerLink}>
                 Terms
               </Link>
-              {site.supportEmail ? (
+              {site.supportUrl ? (
                 <>
                   {"  ·  "}
-                  <Link className="sc-muted" href={`mailto:${site.supportEmail}`} style={footerLink}>
+                  <Link className="sc-muted" href={site.supportUrl} style={footerLink}>
                     Help
                   </Link>
                 </>

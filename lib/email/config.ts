@@ -4,7 +4,6 @@ export type EmailTransport = "resend" | "file" | "console" | "disabled";
 
 export interface EmailEnv {
   RESEND_API_KEY?: string;
-  EMAIL_FROM?: string;
   EMAIL_REPLY_TO?: string;
   EMAIL_TRANSPORT?: string;
   EMAIL_OUTBOX_DIR?: string;
@@ -25,17 +24,20 @@ export function resolveTransport(env: EmailEnv): EmailTransport {
 }
 
 /**
- * Sender address. Resend only delivers to other people from a domain you have verified in Resend.
- * The fallback, onboarding@resend.dev, only delivers to the email address that owns the Resend account.
+ * Resend's shared test sender. Stackcase always sends from it, so no domain has to be verified.
+ * Limitation: Resend delivers mail from this address only to the email address that owns the Resend account,
+ * and rejects every other recipient with a 403 ("You can only send testing emails to your own email address").
+ * Delivering to all users needs a domain verified in Resend and a sender on it.
  */
-export function resolveFrom(env: EmailEnv): string {
-  return env.EMAIL_FROM?.trim() || `${siteConfig.name} <onboarding@resend.dev>`;
+export const EMAIL_SENDER = "onboarding@resend.dev";
+
+export function resolveFrom(): string {
+  return `${siteConfig.name} <${EMAIL_SENDER}>`;
 }
 
 export function emailEnv(): EmailEnv {
   return {
     RESEND_API_KEY: process.env.RESEND_API_KEY,
-    EMAIL_FROM: process.env.EMAIL_FROM,
     EMAIL_REPLY_TO: process.env.EMAIL_REPLY_TO,
     EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT,
     EMAIL_OUTBOX_DIR: process.env.EMAIL_OUTBOX_DIR,

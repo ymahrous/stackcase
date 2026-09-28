@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import LoginPage from "@/app/(auth)/login/page";
 import AuthLayout from "@/app/(auth)/layout";
 import SignupPage from "@/app/(auth)/signup/page";
@@ -119,6 +119,15 @@ describe("dashboard pages", () => {
     const settings = html(await SettingsPage());
     expect(settings).toContain("Change username");
     expect(settings).toContain("Delete account and portfolio");
+    expect(settings).toContain("Cookies and analytics");
+    expect(settings).toContain("doesn&#x27;t collect analytics");
+    expect(settings).not.toContain('name="analyticsConsent"');
+    vi.stubEnv("VERCEL", "1");
+    const onVercel = html(await SettingsPage());
+    vi.unstubAllEnvs();
+    // The choice lives in the browser, so the server renders the switch disabled until it hydrates.
+    expect(onVercel).toMatch(/<input(?=[^>]*name="analyticsConsent")(?=[^>]*disabled)[^>]*>/);
+    expect(onVercel).toContain('href="/privacy#cookies"');
     const preview = html(await PreviewPage());
     expect(preview).toContain("not published yet");
     expect(preview).not.toContain("<main");

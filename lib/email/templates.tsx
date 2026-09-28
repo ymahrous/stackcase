@@ -6,7 +6,7 @@ import PasswordChanged, { passwordChangedSubject } from "@/emails/PasswordChange
 import PasswordReset, { passwordResetSubject } from "@/emails/PasswordReset";
 import UsernameChanged, { usernameChangedSubject } from "@/emails/UsernameChanged";
 import VerifyEmail, { verifyEmailSubject } from "@/emails/VerifyEmail";
-import { operator } from "@/lib/legal";
+import { contactLinks } from "@/lib/legal";
 import { siteConfig } from "@/lib/site";
 
 export interface RenderedEmail {
@@ -17,12 +17,11 @@ export interface RenderedEmail {
 
 /** The deployment details every template receives. */
 export function siteInfo(): SiteInfo {
-  const op = operator();
   return {
     name: siteConfig.name,
     url: siteConfig.url,
     host: siteConfig.host,
-    supportEmail: op.contactConfigured ? op.email : null,
+    supportUrl: contactLinks.issues,
   };
 }
 

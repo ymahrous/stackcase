@@ -64,6 +64,7 @@ Prettier reformats code after you write it; re-read a file before making a follo
 - Never hard-code the domain or protocol. Use `siteConfig`, `absoluteUrl()`, `portfolioUrl()` and `portfolioAddress()` from `lib/site.ts`. Production builds fail without `NEXT_PUBLIC_SITE_URL`.
 - Brand facts (name, tagline, definition, keywords) come from `lib/brand.ts`. The product is "Stackcase", one word, capital S.
 - Stackcase is the legal name, operator and copyright holder. Copyright lines read `© <year> Stackcase. All rights reserved.` Don't add personal names or postal addresses to legal pages. Users' own portfolio footers keep the owner's copyright.
+- There is no contact email. The UI, legal pages, emails and `security.txt` link GitHub instead: `contactLinks` in `lib/legal.ts` (issues, and private vulnerability reporting for anything confidential), built from `brand.repository`. Don't add `mailto:` links except users' own portfolio contact.
 
 **Next.js**
 
@@ -80,7 +81,7 @@ Prettier reformats code after you write it; re-read a file before making a follo
 - Redirect targets from user input go through `safeNextPath()` in `lib/routing.ts`.
 - The CSP (`lib/security-headers.ts`) allows only our own origin. Don't add third-party scripts, styles, fonts or images.
 - Never log secrets, tokens, passwords or email bodies; use `log()` from `lib/log.ts`.
-- Vercel Analytics renders only when `process.env.VERCEL` is set, and URLs pass through `redactUrl()` in `lib/telemetry.ts`. Pages whose links carry secrets go in `UNTRACKED_PATHS`.
+- Vercel Analytics renders only when `process.env.VERCEL` is set and the visitor has allowed it in the cookie banner (`analytics_consent` cookie, `lib/consent.ts`; Global Privacy Control counts as a refusal). URLs pass through `redactUrl()` in `lib/telemetry.ts`. Pages whose links carry secrets go in `UNTRACKED_PATHS`. Add any new browser measurement inside `components/telemetry/Telemetry.tsx` so it stays behind consent.
 
 **Database**
 
@@ -96,6 +97,7 @@ Prettier reformats code after you write it; re-read a file before making a follo
 
 **Email**
 
+- The sender is always `Stackcase <onboarding@resend.dev>` (`EMAIL_SENDER` in `lib/email/config.ts`); there is no `EMAIL_FROM`. Resend delivers from it only to the Resend account owner's address and rejects others with a 403, logged as `email.rejected`.
 - Templates in `emails/` use `EmailLayout` and its `Paragraph`, `Action`, `Facts`, `Notice` helpers, export a `PreviewProps` sample and a subject helper, and never import app modules (so the preview server works).
 - Render through `lib/email/templates.tsx` (async; returns `{ subject, html, text }`) and send from `lib/account-email.ts`. The first URL in the plain-text version must be the action link; e2e tests rely on it.
 
@@ -105,7 +107,8 @@ Prettier reformats code after you write it; re-read a file before making a follo
 
 **Legal and privacy**
 
-- A change that collects new personal data, adds a processor or changes retention must update `app/(legal)/privacy/page.tsx`; bump `LEGAL_VERSION` and `LEGAL_UPDATED` in `lib/legal.ts` for material changes. The legal texts are templates, not legal advice; don't present edits as legally verified.
+- A change that collects new personal data, adds a processor, adds a cookie or changes retention must update `app/(legal)/privacy/page.tsx`; bump `LEGAL_VERSION` (format `YYYY-NNN`) and `LEGAL_UPDATED` in `lib/legal.ts` for material changes. The legal texts are templates, not legal advice; don't present edits as legally verified.
+- The texts are worldwide: one policy for everyone, no region-specific sections, no EU/UK representatives, and international governing law (`GOVERNING_LAW`). Keep new text jurisdiction-neutral and keep the "local mandatory rights still apply" wording.
 
 **Tests**
 

@@ -12,6 +12,9 @@ export const brand = {
   /** Meta description, kept under 160 characters. */
   description:
     "Free portfolio builder for software engineers. Turn your projects into case studies recruiters read, published at your own link with SEO built in.",
+  /** Public source repository. Support, privacy, legal and accessibility requests go through its issues. */
+  repository: "https://github.com/ymahrous/stackcase",
+  /** The target audience for the product. */
   audience: "Software engineers, including students, career changers and senior engineers",
   price: "Free",
   keywords: [

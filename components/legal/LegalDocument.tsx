@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ExternalLink } from "@/components/ExternalLink";
 import { JsonLd } from "@/components/JsonLd";
 import { LEGAL_UPDATED, LEGAL_VERSION, type Operator } from "@/lib/legal";
 import { absoluteUrl, siteConfig } from "@/lib/site";
@@ -14,14 +15,13 @@ interface LegalDocumentProps {
   title: string;
   summary: ReactNode;
   sections: LegalSection[];
-  operator: Operator;
 }
 
 /**
  * Shared layout for the privacy policy, terms and accessibility statement: plain-language summary first,
  * a table of contents with anchor links, then numbered sections. Numbering is meaningful: sections are cited.
  */
-export function LegalDocument({ path, title, summary, sections, operator }: LegalDocumentProps) {
+export function LegalDocument({ path, title, summary, sections }: LegalDocumentProps) {
   const url = absoluteUrl(path);
   return (
     <article className="legal" aria-labelledby="legal-title">
@@ -55,11 +55,6 @@ export function LegalDocument({ path, title, summary, sections, operator }: Lega
         <p className="legal-meta">
           Last updated <time dateTime={LEGAL_VERSION}>{LEGAL_UPDATED}</time> · Version {LEGAL_VERSION}
         </p>
-        {operator.complete ? null : (
-          <p className="ui-msg error legal-config" role="note">
-            Contact details are incomplete. Set LEGAL_CONTACT_EMAIL (or EMAIL_REPLY_TO) before launch.
-          </p>
-        )}
         <div className="legal-summary">{summary}</div>
       </header>
       <nav className="legal-toc" aria-label="Contents">
@@ -86,12 +81,27 @@ export function LegalDocument({ path, title, summary, sections, operator }: Lega
   );
 }
 
+/** How to reach us: GitHub issues, since Stackcase has no contact email. */
 export function Contact({ operator }: { operator: Operator }) {
   return (
     <>
       <b>{operator.name}</b>
       <br />
-      Open an issue here: <a href={`mailto:${operator.email}`}>{operator.email}</a>
+      Open an issue on GitHub:{" "}
+      <ExternalLink href={operator.contactUrl}>{operator.contactUrl.replace(/^https:\/\//, "")}</ExternalLink>
     </>
+  );
+}
+
+/** Reminder shown wherever we ask people to open an issue. */
+export function PublicIssueNotice({ operator }: { operator: Operator }) {
+  return (
+    <p>
+      <b>GitHub issues are public.</b> Don&apos;t include your email address, password or other personal data.
+      For anything that must stay private, such as a security problem or a report that names a person, use{" "}
+      <ExternalLink href={operator.privateReportUrl}>GitHub&apos;s private reporting</ExternalLink> instead.
+      You need a free GitHub account for either; if that&apos;s a barrier, someone you trust can open the
+      issue for you.
+    </p>
   );
 }

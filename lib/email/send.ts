@@ -28,7 +28,7 @@ function resend(key: string) {
  */
 export async function sendEmail(email: OutgoingEmail, env: EmailEnv = emailEnv()): Promise<SendResult> {
   const transport = resolveTransport(env);
-  const from = resolveFrom(env);
+  const from = resolveFrom();
   try {
     switch (transport) {
       case "resend": {

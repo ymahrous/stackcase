@@ -11,7 +11,8 @@ You're welcome to use AI assistants. [AGENTS.md](AGENTS.md) gives them the comma
 ## Ground rules
 
 - **Be respectful.** Assume good faith, keep feedback about the code, and help newcomers.
-- **Security issues are private.** Don't open a public issue for a vulnerability. Email the address in `/.well-known/security.txt` (or `LEGAL_CONTACT_EMAIL`) with steps to reproduce. We'll acknowledge it and keep you updated.
+- **Security issues are private.** Don't open a public issue for a vulnerability. Report it through GitHub's [private vulnerability reporting](https://github.com/ymahrous/stackcase/security/advisories/new) (also listed in `/.well-known/security.txt`) with steps to reproduce. We'll acknowledge it and keep you updated.
+- **No contact email.** Stackcase is reached only through GitHub issues and private reports. Don't add email addresses (or `mailto:` links) to the UI, the legal pages or account emails; link `contactLinks` from `lib/legal.ts` instead.
 - **Discuss big changes first.** For a new feature, a new dependency or a schema change, open an issue describing the problem before writing the code.
 - **Never commit secrets** or real personal data. Use `.env.local` (git-ignored) and fictional sample data.
 
@@ -93,7 +94,9 @@ Without `RESEND_API_KEY`, account emails print to the terminal, links included. 
 
 - If a change collects new personal data, adds a processor or changes retention, update `app/(legal)/privacy/page.tsx` in the same PR and bump `LEGAL_VERSION` and `LEGAL_UPDATED` in `lib/legal.ts` for material changes.
 - Stackcase is the operator's legal name and copyright holder everywhere. Don't add personal names or postal addresses to the legal pages.
-- Analytics must stay cookieless and must not record personal data; new URL patterns that carry secrets belong in `UNTRACKED_PATHS` in `lib/telemetry.ts`.
+- Analytics must stay cookieless, must not record personal data, and must load only after consent: render browser measurement inside `components/telemetry/Telemetry.tsx`, behind the `analytics_consent` check. New URL patterns that carry secrets belong in `UNTRACKED_PATHS` in `lib/telemetry.ts`.
+- Keep the legal texts worldwide: one set of rules for everyone, no region-specific sections or local representatives, and no country's law chosen in the Terms.
+- Email is always sent from Resend's `onboarding@resend.dev` (`EMAIL_SENDER` in `lib/email/config.ts`). It reaches only the Resend account owner; see "Sender" in the README.
 
 **Copy**
 

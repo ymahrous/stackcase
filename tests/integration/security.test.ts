@@ -99,17 +99,16 @@ describe("pruneExpired", () => {
 });
 
 describe("security.txt", () => {
-  it("is served only when a valid contact is configured", async () => {
-    const { vi } = await import("vitest");
+  it("sends researchers to GitHub's private vulnerability reporting, never email", async () => {
     const { GET } = await import("@/app/.well-known/security.txt/route");
-    vi.stubEnv("SECURITY_CONTACT", "");
-    expect(GET().status).toBe(404);
-    vi.stubEnv("SECURITY_CONTACT", "javascript:alert(1)");
-    expect(GET().status).toBe(404);
-    vi.stubEnv("SECURITY_CONTACT", "mailto:security@example.com");
-    const body = await GET().text();
-    expect(body).toMatch(/^Contact: mailto:security@example.com\nExpires: \d{4}-/);
+    const res = GET();
+    expect(res.status).toBe(200);
+    const body = await res.text();
+    expect(body).toMatch(
+      /^Contact: https:\/\/github\.com\/ymahrous\/stackcase\/security\/advisories\/new\nExpires: \d{4}-/,
+    );
+    expect(body).toContain("Policy: https://stackcase.test/terms#acceptable-use");
     expect(body).toContain("Canonical: https://stackcase.test/.well-known/security.txt");
-    vi.unstubAllEnvs();
+    expect(body).not.toContain("mailto:");
   });
 });

@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Contact, LegalDocument, type LegalSection } from "@/components/legal/LegalDocument";
+import { ExternalLink } from "@/components/ExternalLink";
+import {
+  Contact,
+  LegalDocument,
+  PublicIssueNotice,
+  type LegalSection,
+} from "@/components/legal/LegalDocument";
 import { GOVERNING_LAW, MINIMUM_AGE, operator } from "@/lib/legal";
 import { siteConfig } from "@/lib/site";
 import { USERNAME_HOLD_DAYS } from "@/lib/username";
@@ -32,6 +38,11 @@ export default function TermsPage() {
             these terms limits rights you have as a consumer under the law of the country where you live that
             cannot be waived by contract.
           </p>
+          <p>
+            {name} is a free, open-source project offered online to people worldwide. It isn&apos;t directed
+            at any particular country, and we don&apos;t promise that it meets the legal requirements of every
+            place it can be reached from. You are responsible for following the laws that apply to you.
+          </p>
         </>
       ),
     },
@@ -40,9 +51,10 @@ export default function TermsPage() {
       title: "Who can use Stackcase",
       body: (
         <p>
-          You must be at least {MINIMUM_AGE}, able to form a binding contract, and not barred from using the
-          service under applicable law, including sanctions laws. One person, one account. Keep your details
-          accurate.
+          You must be at least {MINIMUM_AGE} (or older, if the law where you live sets a higher age for using
+          online services without a parent&apos;s consent), able to form a binding contract, and not barred
+          from using the service under applicable law, including sanctions laws. One person, one account. Keep
+          your details accurate.
         </p>
       ),
     },
@@ -53,8 +65,8 @@ export default function TermsPage() {
         <ul>
           <li>Keep your password secret. You&apos;re responsible for activity on your account.</li>
           <li>
-            Tell us straight away at <a href={`mailto:${op.email}`}>{op.email}</a> if you think someone else
-            has access to it.
+            If you think someone else has access to it, reset your password straight away, then tell us
+            through <ExternalLink href={op.privateReportUrl}>GitHub&apos;s private reporting</ExternalLink>.
           </li>
           <li>
             Usernames are first come, first served. We may reclaim or change a username that is reserved,
@@ -107,9 +119,12 @@ export default function TermsPage() {
             <li>create accounts automatically or in bulk.</li>
           </ul>
           <p>
-            Found a security issue? Please report it privately at issues here{" "}
-            <a href={`mailto:${op.email}`}>{op.email}</a>. We won&apos;t pursue good-faith research that
-            follows this policy and doesn&apos;t harm users or data.
+            Found a security issue? Please report it privately through{" "}
+            <ExternalLink href={op.privateReportUrl}>
+              GitHub&apos;s private vulnerability reporting
+            </ExternalLink>
+            , not in a public issue. We won&apos;t pursue good-faith research that follows this policy and
+            doesn&apos;t harm users or data.
           </p>
         </>
       ),
@@ -120,33 +135,41 @@ export default function TermsPage() {
       body: (
         <>
           <p>
-            Anyone can report content they believe is illegal or infringes their rights by opening a GitHub issue at{" "}
-            <a href={`mailto:${op.email}`}>{op.email}</a> with:
+            Anyone can report content they believe is illegal or infringes their rights by opening an issue on{" "}
+            <ExternalLink href={op.contactUrl}>GitHub</ExternalLink>, or privately through{" "}
+            <ExternalLink href={op.privateReportUrl}>GitHub&apos;s private reporting</ExternalLink> if the
+            report contains personal data. Include:
           </p>
           <ol>
             <li>the exact URL(s) of the content;</li>
             <li>
               why you believe it is illegal or infringing (for copyright, the work you claim is infringed);
             </li>
-            <li>your name and email address (except for reports of child sexual abuse material);</li>
+            <li>
+              your name (your GitHub account is how we reply). For child sexual abuse material, report
+              privately, never post a link in a public issue, and also tell your national hotline or the
+              police;
+            </li>
             <li>a statement that the report is accurate and made in good faith;</li>
             <li>
-              for copyright claims under the US DMCA, also a statement, under penalty of perjury, that you are
-              the owner or authorized to act for the owner, and your physical or electronic signature.
+              for copyright claims, also a statement, under penalty of perjury, that you are the owner or
+              authorized to act for the owner, and your electronic signature (typing your full name is
+              enough). This covers what notice-and-takedown laws such as the US DMCA ask for.
             </li>
           </ol>
           <p>
             We review reports promptly and without bias. We may remove content or restrict accounts, and we
-            tell the person affected why, with a statement of reasons as the EU Digital Services Act requires.
-            You can contest our decision by replying within six months; a different person will review it. EU
-            users may also use a certified out-of-court dispute settlement body. Under the DMCA, you may send
-            a counter-notice with the information in 17 U.S.C. § 512(g), and we will handle it as that section
-            provides. We close the accounts of repeat infringers.
+            tell the person affected why, with a clear statement of reasons. You can contest our decision
+            within six months by replying on GitHub; where we can, a different person reviews it. You may also
+            use any out-of-court dispute body or court the law where you live gives you. If your content was
+            removed after a copyright notice, you may send a counter-notice, and we&apos;ll handle it as the
+            applicable law provides. We close the accounts of repeat infringers.
           </p>
           <p>
-            Our single point of contact for authorities and users (DSA Articles 11–12) is{" "}
-            <a href={`mailto:${op.email}`}>{op.email}</a>, in English.
+            Authorities and users can reach us through the same GitHub channels, in English. That is our
+            single point of contact; we don&apos;t accept notices by email.
           </p>
+          <PublicIssueNotice operator={op} />
         </>
       ),
     },
@@ -194,8 +217,9 @@ export default function TermsPage() {
           To the extent the law allows, {name} is provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo;,
           without warranties of any kind, express or implied, including merchantability, fitness for a
           particular purpose and non-infringement. We don&apos;t guarantee that portfolios will rank in search
-          engines or lead to job offers. This section doesn&apos;t affect statutory rights that can&apos;t be
-          excluded, such as those under EU and UK consumer law or the Australian Consumer Law.
+          engines or lead to job offers, or that the service is available or lawful to use in every country.
+          This section doesn&apos;t affect statutory rights that can&apos;t be excluded under the consumer law
+          of the country where you live.
         </p>
       ),
     },
@@ -213,8 +237,9 @@ export default function TermsPage() {
           <p>
             Nothing in these terms excludes or limits liability for death or personal injury caused by
             negligence, for fraud, for gross negligence or willful misconduct, or any other liability that
-            cannot be limited by law. If you are a consumer in the EU or UK, we are liable for foreseeable
-            loss caused by our breach of these terms or our failure to use reasonable care.
+            cannot be limited by law. If the law where you live makes us liable to consumers for foreseeable
+            loss caused by our breach of these terms or our failure to use reasonable care, that liability
+            stays.
           </p>
         </>
       ),
@@ -236,22 +261,21 @@ export default function TermsPage() {
       body: (
         <>
           <p>
-            {name} is an online service offered to people around the world. These terms are governed by{" "}
-            {GOVERNING_LAW}, applied in good faith and with fair dealing. Questions those principles
-            don&apos;t answer are decided under the law that the competent court&apos;s conflict-of-law rules
-            point to.
+            {name} is an online service offered to people around the world, so no single country&apos;s law is
+            chosen. These terms are governed by {GOVERNING_LAW}, applied in good faith and with fair dealing.
+            Questions those principles don&apos;t answer are decided under the law that the competent
+            court&apos;s conflict-of-law rules point to.
           </p>
           <p>
             If you are a consumer, you also keep the protection of the mandatory laws of the country where you
-            live, and you may always bring proceedings in the courts of that country (for example, under EU
-            Regulation 1215/2012 and the Rome I Regulation, or in the UK). Nothing in these terms removes
-            rights that the law says cannot be waived.
+            live, and you may always bring proceedings in the courts of that country. Nothing in these terms
+            removes rights that the law says cannot be waived.
           </p>
           <p>
-            <b>Resolving disputes.</b> Please contact us first at{" "}
-            <a href={`mailto:${op.email}`}>{op.email}</a>. We&apos;ll try in good faith to solve the issue
-            within 30 days. If we can&apos;t, either of us may take the dispute to a competent court or, if we
-            both agree in writing, to mediation or arbitration.
+            <b>Resolving disputes.</b> Please open an issue on{" "}
+            <ExternalLink href={op.contactUrl}>GitHub</ExternalLink> first. We&apos;ll try in good faith to
+            solve the issue within 30 days. If we can&apos;t, either of us may take the dispute to a competent
+            court or, if we both agree in writing, to mediation or arbitration.
           </p>
         </>
       ),
@@ -307,7 +331,6 @@ export default function TermsPage() {
     <LegalDocument
       path="/terms"
       title="Terms of Service"
-      operator={op}
       sections={sections}
       summary={
         <>
@@ -319,9 +342,11 @@ export default function TermsPage() {
             <li>You own your content. You let us host and show it so your portfolio works.</li>
             <li>Be honest, lawful and respectful. No spam, impersonation or abuse.</li>
             <li>
-              Report illegal or infringing content by email. We explain our decisions, and you can appeal.
+              Report illegal or infringing content through GitHub. We explain our decisions, and you can
+              appeal.
             </li>
             <li>The service is free and provided as is, and your consumer rights still apply.</li>
+            <li>It&apos;s offered worldwide under international principles, not one country&apos;s law.</li>
           </ul>
         </>
       }

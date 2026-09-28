@@ -1,19 +1,19 @@
+import { contactLinks } from "@/lib/legal";
 import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
 /**
- * RFC 9116 security.txt: tells researchers where to report vulnerabilities.
- * Set SECURITY_CONTACT to a mailto: or https: URL; without it the file isn't served.
+ * RFC 9116 security.txt: tells researchers where to report vulnerabilities. Reports go to GitHub's private
+ * vulnerability reporting on the Stackcase repository (never a public issue), and the policy is in the Terms.
  */
 export function GET() {
-  const contact = process.env.SECURITY_CONTACT?.trim();
-  if (!contact || !/^(mailto:|https:\/\/)/.test(contact)) return new Response("Not found", { status: 404 });
   const expires = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
   const body = [
-    `Contact: ${contact}`,
+    `Contact: ${contactLinks.privateReport}`,
     `Expires: ${expires}`,
     "Preferred-Languages: en",
+    `Policy: ${absoluteUrl("/terms#acceptable-use")}`,
     `Canonical: ${absoluteUrl("/.well-known/security.txt")}`,
     "",
   ].join("\n");

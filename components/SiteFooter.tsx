@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CookieSettingsButton } from "@/components/telemetry/CookieSettingsButton";
 import { legalLinks } from "@/lib/legal";
 import { siteConfig } from "@/lib/site";
 
@@ -29,6 +30,8 @@ export function SiteFooter({ extra }: { extra?: FooterLink[] }) {
             {l.label}
           </Link>
         ))}
+        {/* Analytics, and so the consent panel, exist only on Vercel (see app/layout.tsx). */}
+        {process.env.VERCEL ? <CookieSettingsButton /> : null}
       </nav>
     </footer>
   );

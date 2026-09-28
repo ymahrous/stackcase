@@ -25,26 +25,30 @@ describe("legal pages", () => {
     for (const id of anchors) expect(out, id).toContain(`id="${id}"`);
   });
 
-  it("warns the operator while no contact email is configured", () => {
-    vi.stubEnv("LEGAL_CONTACT_EMAIL", "");
-    vi.stubEnv("EMAIL_REPLY_TO", "");
-    expect(html(<PrivacyPage />)).toMatch(/Contact details are incomplete/);
+  it.each(Object.entries(pages))("/%s sends people to GitHub, never to an email address", (_name, Page) => {
+    const out = html(<Page />);
+    expect(out).not.toContain("mailto:");
+    expect(out).not.toMatch(/Contact details are incomplete|representative \(|Post:/);
+    expect(out).toContain('href="https://github.com/ymahrous/stackcase/issues/new"');
+    expect(out).toContain('href="https://github.com/ymahrous/stackcase/security/advisories/new"');
+    expect(out).toContain("GitHub issues are public.");
   });
 
-  it("names Stackcase as operator, with international governing law and no postal address", () => {
-    vi.stubEnv("LEGAL_CONTACT_EMAIL", "privacy@example.com");
+  it("names Stackcase as operator under one worldwide policy and international governing law", () => {
     const privacy = html(<PrivacyPage />);
     expect(privacy).toContain("<b>Stackcase</b>");
-    expect(privacy).toContain("mailto:privacy@example.com");
-    expect(privacy).not.toMatch(/Contact details are incomplete|Post:/);
-    for (const text of ["Vercel", "Resend", "GDPR", "CCPA", "LGPD", "PIPEDA"])
+    expect(privacy).toContain("isn&#x27;t directed at any particular country");
+    expect(privacy).toContain("Wherever you live");
+    expect(privacy).not.toMatch(/Egypt|Art\. 27|UK representative|EU representative/);
+    for (const text of ["Vercel", "Resend", "GitHub, Inc.", "analytics_consent", "Global Privacy Control"])
       expect(privacy).toContain(text);
+    expect(privacy).toContain("Analytics only run if you allow them.");
     const terms = html(<TermsPage />);
     expect(terms).toContain("agreement between you and Stackcase");
     expect(terms).toContain("UNIDROIT Principles of International Commercial Contracts");
     expect(terms).toContain("mandatory laws of the country where you live");
-    expect(terms).toContain("Digital Services Act");
-    expect(terms).toContain("512(g)");
+    expect(terms).toContain("no single country&#x27;s law is");
+    expect(terms).not.toMatch(/Regulation 1215\/2012|Rome I|Digital Services Act/);
     expect(html(<AccessibilityPage />)).toContain("WCAG");
   });
 

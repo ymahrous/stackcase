@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
-import { Contact, LegalDocument, type LegalSection } from "@/components/legal/LegalDocument";
+import { ExternalLink } from "@/components/ExternalLink";
+import {
+  Contact,
+  LegalDocument,
+  PublicIssueNotice,
+  type LegalSection,
+} from "@/components/legal/LegalDocument";
 import { LEGAL_UPDATED, operator } from "@/lib/legal";
 import { siteConfig } from "@/lib/site";
 
@@ -31,10 +37,9 @@ export default function AccessibilityPage() {
       body: (
         <>
           <p>
-            Our target is the <b>Web Content Accessibility Guidelines (WCAG) 2.2, level AA</b>. That is the
-            level referenced by the European standard EN 301 549 (used by the European Accessibility Act), the
-            US ADA and Section 508, Ontario&apos;s AODA, Australia&apos;s Disability Discrimination Act
-            guidance and Japan&apos;s JIS X 8341-3.
+            Our target is the <b>Web Content Accessibility Guidelines (WCAG) 2.2, level AA</b>, the
+            international standard that accessibility laws and public-sector standards around the world refer
+            to.
           </p>
           <p>
             <b>Status: partially conformant.</b> The pages and features we build pass automated checks for
@@ -121,12 +126,15 @@ export default function AccessibilityPage() {
       id: "feedback",
       title: "Feedback and alternative formats",
       body: (
-        <p>
-          If you find a barrier, or need information in another format, contact us: <Contact operator={op} />
-          <br />
-          Please tell us the page address and what happened. We aim to reply within 5 business days and to fix
-          confirmed issues as quickly as we can, providing the information another way in the meantime.
-        </p>
+        <>
+          <p>
+            If you find a barrier, or need information in another format, tell us: <Contact operator={op} />
+            <br />
+            Please give the page address and what happened. We aim to reply within 5 business days and to fix
+            confirmed issues as quickly as we can, providing the information another way in the meantime.
+          </p>
+          <PublicIssueNotice operator={op} />
+        </>
       ),
     },
     {
@@ -134,11 +142,9 @@ export default function AccessibilityPage() {
       title: "Enforcement",
       body: (
         <p>
-          If you&apos;re not satisfied with our response, you can contact the authority responsible where you
-          live. For example: the national market surveillance authority under the European Accessibility Act
-          (Directive (EU) 2019/882) in EU member states; the Equality Advisory and Support Service in Great
-          Britain; the US Department of Justice (ADA); the Accessibility Directorate of Ontario; or the
-          Australian Human Rights Commission.
+          If you&apos;re not satisfied with our response, you can contact the authority responsible for
+          accessibility or equality where you live, if there is one. Nothing in this statement limits the
+          rights that law gives you.
         </p>
       ),
     },
@@ -159,13 +165,12 @@ export default function AccessibilityPage() {
     <LegalDocument
       path="/accessibility"
       title="Accessibility Statement"
-      operator={op}
       sections={sections}
       summary={
         <p>
           <b>In short:</b> we build {name} to WCAG 2.2 AA, test every key page automatically on every change,
-          and fix reported barriers quickly. If something doesn&apos;t work for you, email{" "}
-          <a href={`mailto:${op.email}`}>{op.email}</a>.
+          and fix reported barriers quickly. If something doesn&apos;t work for you, open an issue on{" "}
+          <ExternalLink href={op.contactUrl}>GitHub</ExternalLink>.
         </p>
       }
     />

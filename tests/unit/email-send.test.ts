@@ -27,14 +27,13 @@ describe("sendEmail", () => {
       { ...email, idempotencyKey: "k1" },
       {
         RESEND_API_KEY: "re_key",
-        EMAIL_FROM: "Stackcase <hi@mail.example.com>",
         EMAIL_REPLY_TO: "help@example.com",
       },
     );
     expect(result).toEqual({ ok: true, id: "re_1" });
     expect(send).toHaveBeenCalledWith(
       {
-        from: "Stackcase <hi@mail.example.com>",
+        from: "Stackcase <onboarding@resend.dev>",
         to: "ada@example.com",
         subject: "Hi",
         html: "<p>Hi</p>",

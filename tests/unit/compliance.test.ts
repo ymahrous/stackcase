@@ -8,7 +8,7 @@ vi.mock("@vercel/analytics/server", () => ({ track }));
 
 const { redactUrl } = await import("@/lib/telemetry");
 const { trackEvent } = await import("@/lib/events");
-const { GOVERNING_LAW, resolveOperator, legalLinks, MINIMUM_AGE } = await import("@/lib/legal");
+const { GOVERNING_LAW, contactLinks, resolveOperator, legalLinks, MINIMUM_AGE } = await import("@/lib/legal");
 const { MARK, markSvg } = await import("@/lib/brand-mark");
 
 describe("redactUrl (analytics privacy)", () => {
@@ -47,30 +47,23 @@ describe("trackEvent", () => {
 });
 
 describe("resolveOperator", () => {
-  it("names Stackcase as the operator and is complete once a contact email is set", () => {
+  it("names Stackcase as the operator, reachable only through GitHub", () => {
     const op = resolveOperator({
-      LEGAL_CONTACT_EMAIL: " legal@example.com ",
+      LEGAL_DATABASE_PROVIDER: " Neon Inc. (USA) ",
       LEGAL_BACKUP_RETENTION_DAYS: "7",
     });
-    expect(op).toMatchObject({
+    expect(op).toEqual({
       name: "Stackcase",
-      email: "legal@example.com",
-      contactConfigured: true,
+      contactUrl: "https://github.com/ymahrous/stackcase/issues/new",
+      privateReportUrl: "https://github.com/ymahrous/stackcase/security/advisories/new",
+      databaseProvider: "Neon Inc. (USA)",
       backupRetentionDays: 7,
-      complete: true,
     });
-    expect(op).not.toHaveProperty("address");
+    expect(contactLinks.issues).toBe("https://github.com/ymahrous/stackcase/issues");
   });
-  it("falls back to the reply-to address, then flags the missing contact", () => {
-    expect(resolveOperator({ EMAIL_REPLY_TO: "help@example.com" })).toMatchObject({
-      email: "help@example.com",
-      complete: true,
-    });
-    const op = resolveOperator({ LEGAL_BACKUP_RETENTION_DAYS: "-3" });
-    expect(op).toMatchObject({
-      name: "Stackcase",
-      contactConfigured: false,
-      complete: false,
+  it("needs no configuration: generic provider and 30-day backups by default", () => {
+    expect(resolveOperator({ LEGAL_BACKUP_RETENTION_DAYS: "-3" })).toMatchObject({
+      databaseProvider: "our database hosting provider",
       backupRetentionDays: 30,
     });
   });

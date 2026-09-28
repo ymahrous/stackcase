@@ -3,7 +3,7 @@ import { resolveFrom, resolveTransport } from "@/lib/email/config";
 import { render } from "@react-email/render";
 import { createElement } from "react";
 import AccountDeleted from "@/emails/AccountDeleted";
-import { formatWhen } from "@/emails/components/theme";
+import { formatWhen, previewSite } from "@/emails/components/theme";
 import PasswordChanged from "@/emails/PasswordChanged";
 import PasswordReset from "@/emails/PasswordReset";
 import UsernameChanged from "@/emails/UsernameChanged";
@@ -36,11 +36,8 @@ describe("resolveTransport", () => {
 });
 
 describe("resolveFrom", () => {
-  it("prefers EMAIL_FROM and falls back to Resend's test sender", () => {
-    expect(resolveFrom({ EMAIL_FROM: "Stackcase <hi@mail.example.com>" })).toBe(
-      "Stackcase <hi@mail.example.com>",
-    );
-    expect(resolveFrom({})).toBe("Stackcase <onboarding@resend.dev>");
+  it("always sends from Resend's default sender", () => {
+    expect(resolveFrom()).toBe("Stackcase <onboarding@resend.dev>");
   });
 });
 
@@ -110,6 +107,15 @@ describe("templates", () => {
       const html = await render(createElement(T as never, T.PreviewProps as never));
       expect(html, T.name).toContain("Stackcase");
     }
+  });
+
+  it("links Help to GitHub issues, never to an email address, and drops it when unset", async () => {
+    const withHelp = await verifyEmailTemplate({ name: "Ada", url });
+    expect(withHelp.html).toContain('href="https://github.com/ymahrous/stackcase/issues"');
+    expect(withHelp.html).not.toContain("mailto:");
+    const props = { ...VerifyEmail.PreviewProps, site: { ...previewSite, supportUrl: null } };
+    const html = await render(createElement(VerifyEmail, props));
+    expect(html).not.toContain(">Help<");
   });
 });
 

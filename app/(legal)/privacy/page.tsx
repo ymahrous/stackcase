@@ -1,13 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Contact, LegalDocument, type LegalSection } from "@/components/legal/LegalDocument";
+import { ExternalLink } from "@/components/ExternalLink";
+import {
+  Contact,
+  LegalDocument,
+  PublicIssueNotice,
+  type LegalSection,
+} from "@/components/legal/LegalDocument";
+import { CONSENT_COOKIE, CONSENT_MAX_AGE_DAYS } from "@/lib/consent";
 import { MINIMUM_AGE, operator } from "@/lib/legal";
 import { siteConfig } from "@/lib/site";
 import { USERNAME_HOLD_DAYS } from "@/lib/username";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: `How ${siteConfig.name} collects, uses and protects personal data, and your rights under GDPR, UK GDPR, CCPA/CPRA, LGPD, PIPEDA, Egypt's PDPL and other laws.`,
+  description: `How ${siteConfig.name} collects, uses and protects personal data, and the privacy rights it gives everyone, wherever they live.`,
   alternates: { canonical: "/privacy" },
 };
 
@@ -55,15 +62,15 @@ export default function PrivacyPage() {
       body: (
         <>
           <p>
-            {op.name} ({siteConfig.host}) is the <b>controller</b> of your personal data (called the
-            &ldquo;business&rdquo; under the CCPA and the &ldquo;data controller&rdquo; or &ldquo;personal
-            information controller&rdquo; under other laws). You can reach us at:
+            {op.name} ({siteConfig.host}) is the <b>controller</b> of your personal data: we decide why and
+            how it is used. {name} is an open-source project offered online to people worldwide, and it
+            isn&apos;t directed at any particular country. We don&apos;t have local offices or appointed local
+            representatives, and we don&apos;t offer contact by email. You can reach us at:
           </p>
           <p>
             <Contact operator={op} />
           </p>
-          {op.euRepresentative ? <p>EU representative (GDPR Art. 27): {op.euRepresentative}</p> : null}
-          {op.ukRepresentative ? <p>UK representative (UK GDPR Art. 27): {op.ukRepresentative}</p> : null}
+          <PublicIssueNotice operator={op} />
           <p>
             This policy covers the {name} website, dashboard and the public portfolios we host. It does not
             cover other websites that portfolios link to.
@@ -81,12 +88,12 @@ export default function PrivacyPage() {
             trackers.
           </p>
           <Table
-            head={["Data", "Why", "Legal basis (GDPR/UK GDPR)"]}
+            head={["Data", "Why", "Legal basis"]}
             rows={[
               [
                 "Email address",
                 "Log in, account emails (confirmation, password reset, security notices)",
-                "Contract (Art. 6(1)(b))",
+                "Contract",
               ],
               ["Password", "Log in. We store only a salted scrypt hash, never the password", "Contract"],
               ["Username", "Your portfolio address and log-in identity", "Contract"],
@@ -103,9 +110,14 @@ export default function PrivacyPage() {
               [
                 "Consent record: date and version of the terms you accepted",
                 "Prove what you agreed to",
-                "Legal obligation and legitimate interests (Art. 6(1)(c), (f))",
+                "Legal obligation and legitimate interests",
               ],
               ["Session cookie and session record", "Keep you logged in", "Contract; strictly necessary"],
+              [
+                "Your analytics choice (a cookie in your browser)",
+                "Remember whether you allowed analytics, so we don't ask on every page",
+                "Legal obligation (keeping a record of consent)",
+              ],
               [
                 "IP address and email in rate-limit counters",
                 "Stop password guessing, spam and abuse",
@@ -122,9 +134,9 @@ export default function PrivacyPage() {
                 "Legitimate interests",
               ],
               [
-                "Anonymous usage and performance statistics",
+                "Anonymous usage and performance statistics (only if you allow them)",
                 "Understand which pages work and how fast they load",
-                "Legitimate interests",
+                "Consent, which you can withdraw at any time",
               ],
             ]}
           />
@@ -163,19 +175,36 @@ export default function PrivacyPage() {
       title: "Cookies and similar technologies",
       body: (
         <>
+          <p>We use two cookies. Neither is used for advertising or to follow you across other websites.</p>
+          <Table
+            head={["Cookie", "Purpose", "Lasts"]}
+            rows={[
+              [
+                "__Host-session",
+                "Keeps you logged in. Strictly necessary, so it doesn't need consent",
+                "Up to 30 days, renewed while you use the site",
+              ],
+              [
+                CONSENT_COOKIE,
+                "Remembers whether you allowed analytics",
+                `${CONSENT_MAX_AGE_DAYS} days, then we ask again`,
+              ],
+            ]}
+          />
           <p>
-            We use <b>one cookie</b>: a session cookie that keeps you logged in (named{" "}
-            <code>__Host-session</code>, lasting up to 30 days and renewed while you use the site). It is
-            strictly necessary, so under the EU ePrivacy Directive (Art. 5(3)), the UK PECR and similar laws
-            it doesn&apos;t require consent. That&apos;s why there is no cookie banner.
+            <b>Analytics only run if you allow them.</b> On your first visit we ask whether we may use Vercel
+            Web Analytics and Speed Insights to count page views and measure loading speed. They set no
+            cookies and use no cross-site identifiers, and visits are counted with a hash of the request that
+            is discarded after 24 hours. We still ask first, because they run a script that sends information
+            from your device. Before any page address is sent, we remove query parameters and exclude password
+            reset and email confirmation pages entirely.
           </p>
           <p>
-            Our analytics and performance measurement (Vercel Web Analytics and Speed Insights) use{" "}
-            <b>no cookies</b> and no cross-site identifiers. Visits are counted with a hash of the request
-            that is discarded after 24 hours. Before any page address is sent, we remove query parameters and
-            exclude password reset and email confirmation pages entirely.
+            Declining changes nothing else about the site. You can change your choice at any time with the
+            &ldquo;Cookie settings&rdquo; link at the bottom of our pages, or under &ldquo;Cookies and
+            analytics&rdquo; in your account Settings. If your browser sends a Global Privacy Control signal,
+            we treat it as a refusal and don&apos;t ask.
           </p>
-          <p>We honor Global Privacy Control signals, though we have no tracking to switch off.</p>
         </>
       ),
     },
@@ -201,12 +230,20 @@ export default function PrivacyPage() {
             ]}
           />
           <p>
+            If you contact us on GitHub, GitHub, Inc. (USA) handles what you post under its own{" "}
+            <ExternalLink href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">
+              privacy statement
+            </ExternalLink>
+            , as a separate controller, not on our behalf. Issues are public; private reports are visible only
+            to you and us.
+          </p>
+          <p>
             We may disclose data if the law requires it, to protect people&apos;s safety or rights, or as part
             of a merger or sale of the service. If a sale happens, this policy continues to apply.
           </p>
           <p>
-            <b>We do not sell or share personal information</b> as the CCPA/CPRA defines those terms, and we
-            don&apos;t use it for targeted advertising.
+            <b>We do not sell or share personal information</b>, for money or for cross-context advertising,
+            and we don&apos;t use it for targeted advertising.
           </p>
         </>
       ),
@@ -216,13 +253,10 @@ export default function PrivacyPage() {
       title: "International transfers",
       body: (
         <p>
-          Our providers may process data outside your country, including in the United States. For transfers
-          from the EEA, UK or Switzerland, we rely on adequacy decisions (such as the EU-US Data Privacy
-          Framework, where the provider is certified), the European Commission&apos;s Standard Contractual
-          Clauses, or the UK International Data Transfer Addendum, together with supplementary safeguards.
-          Similar mechanisms cover transfers under Brazil&apos;s LGPD, Egypt&apos;s Personal Data Protection
-          Law (Law No. 151 of 2020) and other laws that restrict cross-border transfers. Contact us for a copy
-          of the relevant safeguards.
+          {name} runs on global infrastructure, so your data may be processed outside your country, including
+          in the United States. Where a law restricts cross-border transfers, we rely on the safeguards our
+          providers offer for it, such as standard contractual clauses or recognized certification schemes.
+          Ask us for details through GitHub.
         </p>
       ),
     },
@@ -247,6 +281,11 @@ export default function PrivacyPage() {
             ["Previous usernames", `${USERNAME_HOLD_DAYS} days, so old links keep working`],
             ["Server logs", "As set by our hosting plan, typically up to 30 days"],
             ["Analytics", "Aggregate statistics only; visitor hashes are discarded after 24 hours"],
+            ["Your analytics choice", `${CONSENT_MAX_AGE_DAYS} days in your browser`],
+            [
+              "GitHub issues and private reports",
+              "Until they are no longer needed; ask us to delete an issue that contains your personal data",
+            ],
             ["Sent email records at Resend", "According to Resend's retention period"],
           ]}
         />
@@ -257,7 +296,7 @@ export default function PrivacyPage() {
       title: "Your rights",
       body: (
         <>
-          <p>Depending on where you live, you have some or all of these rights. We give them to everyone:</p>
+          <p>We give these rights to everyone, wherever you live:</p>
           <ul>
             <li>
               <b>Access and portability.</b> Download a copy of your data from{" "}
@@ -284,70 +323,37 @@ export default function PrivacyPage() {
               <b>No discrimination</b> for exercising your rights.
             </li>
             <li>
-              <b>Complain</b> to a data protection authority. For example: your EU/EEA supervisory authority,
-              the UK Information Commissioner&apos;s Office, the California Privacy Protection Agency,
-              Brazil&apos;s ANPD, the Office of the Privacy Commissioner of Canada, the Office of the
-              Australian Information Commissioner, or Egypt&apos;s Personal Data Protection Center. We&apos;d
+              <b>Complain</b> to the data protection authority where you live, if there is one. We&apos;d
               appreciate the chance to help first.
             </li>
           </ul>
           <p>
-            To make a request, open an issue here <a href={`mailto:${op.email}`}>{op.email}</a> from your account&apos;s
-            address, or through an authorized agent where the law allows. We may need to verify your identity.
-            We respond within the time the law sets (for example, one month under GDPR and UK GDPR, 45 days
-            under the CCPA, and 15 days under the LGPD). Requests are free unless they are manifestly
-            unfounded or excessive. If we refuse a request, we&apos;ll explain why and how to appeal. US
-            residents of states with an appeal right can appeal by replying to our decision.
+            Most of these you can do yourself in the dashboard. For anything else, open an issue on{" "}
+            <ExternalLink href={op.contactUrl}>GitHub</ExternalLink> describing what you need without personal
+            details, or ask someone to do it for you where the law allows. To confirm that the account is
+            yours, we may ask you to add a short code we give you to your portfolio for a moment. We reply
+            within one month, sooner where the law where you live sets a shorter time. Requests are free
+            unless they are clearly unfounded or excessive. If we refuse a request, we&apos;ll explain why,
+            and you can ask for a second review by replying on the issue.
           </p>
         </>
       ),
     },
     {
-      id: "jurisdictions",
-      title: "Region-specific information",
+      id: "worldwide",
+      title: "Wherever you live",
       body: (
         <>
-          <h3>European Economic Area, United Kingdom and Switzerland</h3>
           <p>
-            The legal bases are listed in section 2. You have the rights in GDPR Articles 15–22 (UK GDPR
-            equivalents; the Swiss revised FADP). Where we rely on legitimate interests, we have balanced them
-            against your rights; ask us for details.
+            We apply this one policy to everyone. It is built on the principles shared by data protection laws
+            around the world, such as the EU and UK GDPR, the California CCPA/CPRA, Brazil&apos;s LGPD,
+            Canada&apos;s PIPEDA and similar laws elsewhere: collect little, say why, keep it safe, delete it
+            when it&apos;s no longer needed, and let people see, fix, take and delete their data.
           </p>
-          <h3>United States (California and other states)</h3>
           <p>
-            In the last 12 months we collected these CCPA categories: identifiers (email, username, IP
-            address), customer records (account details), internet activity (server logs, aggregated usage),
-            approximate location derived from IP address in aggregated analytics, and professional information
-            you choose to publish. We collected them from you and your device, for the purposes in section 2.
-            We don&apos;t sell or share them, and we don&apos;t use sensitive personal information to infer
-            characteristics. The same applies under the privacy laws of Virginia, Colorado, Connecticut, Utah,
-            Texas, Oregon and other states.
-          </p>
-          <h3>Canada</h3>
-          <p>
-            We handle personal information according to PIPEDA and applicable provincial laws, including
-            Québec&apos;s Law 25. Our privacy contact is listed in section 1.
-          </p>
-          <h3>Brazil</h3>
-          <p>
-            Under the LGPD you have the rights in Article 18, including confirmation of processing, access,
-            correction, anonymization, portability, deletion, information about sharing, and revoking consent.
-            The legal bases correspond to Article 7 (performance of a contract, legitimate interest, legal
-            obligation).
-          </p>
-          <h3>Egypt and the Middle East</h3>
-          <p>
-            We process data in line with Egypt&apos;s Personal Data Protection Law (Law No. 151 of 2020),
-            including your rights to know, access, correct, restrict and object, and the safeguards for
-            cross-border transfers. Similar principles apply under the UAE&apos;s PDPL and Saudi Arabia&apos;s
-            PDPL.
-          </p>
-          <h3>Asia-Pacific and Africa</h3>
-          <p>
-            We also respect the rights given by Australia&apos;s Privacy Act 1988 (Australian Privacy
-            Principles), Japan&apos;s APPI, South Korea&apos;s PIPA, Singapore&apos;s PDPA, India&apos;s
-            Digital Personal Data Protection Act 2023, China&apos;s PIPL, South Africa&apos;s POPIA,
-            Nigeria&apos;s NDPA and Kenya&apos;s Data Protection Act. Contact us to exercise them.
+            If the law where you live gives you rights or protections beyond this policy, you have them too,
+            and nothing here takes them away. We don&apos;t claim that this policy meets every requirement of
+            every country&apos;s law.
           </p>
         </>
       ),
@@ -366,8 +372,7 @@ export default function PrivacyPage() {
           </ul>
           <p>
             No system is perfectly secure. If a breach puts your data at risk, we&apos;ll notify you and the
-            relevant authorities as the law requires (for example, within 72 hours of becoming aware under
-            GDPR).
+            relevant authorities without undue delay, as the law requires.
           </p>
         </>
       ),
@@ -377,10 +382,11 @@ export default function PrivacyPage() {
       title: "Children",
       body: (
         <p>
-          {name} is not for children. You must be at least {MINIMUM_AGE} to create an account. That is the
-          highest digital-consent age in the EU (GDPR Art. 8), and above the US COPPA threshold of 13. We
+          {name} is not for children. You must be at least {MINIMUM_AGE} to create an account, or older if the
+          law where you live sets a higher age for using online services without a parent&apos;s consent. We
           don&apos;t knowingly collect data from younger children; if you believe a child has created an
-          account, contact us and we&apos;ll delete it.
+          account, tell us through GitHub (privately, without naming the child in a public issue) and
+          we&apos;ll delete it.
         </p>
       ),
     },
@@ -409,7 +415,6 @@ export default function PrivacyPage() {
     <LegalDocument
       path="/privacy"
       title="Privacy Policy"
-      operator={op}
       sections={sections}
       summary={
         <>
@@ -421,7 +426,8 @@ export default function PrivacyPage() {
               We collect what&apos;s needed to run your account and portfolio, and nothing for advertising.
             </li>
             <li>Your portfolio is private until you publish it; then it&apos;s public.</li>
-            <li>One strictly necessary cookie. Analytics are cookieless and anonymous.</li>
+            <li>No advertising cookies. Anonymous, cookieless analytics run only if you allow them.</li>
+            <li>We don&apos;t offer support by email: reach us through GitHub issues.</li>
             <li>We never sell your data.</li>
             <li>You can download or delete everything from Settings, at any time.</li>
           </ul>

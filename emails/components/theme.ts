@@ -25,8 +25,8 @@ export interface SiteInfo {
   url: string;
   /** Host for display, e.g. stackcase.vercel.app */
   host: string;
-  /** Where people can reply for help. Optional. */
-  supportEmail?: string | null;
+  /** Where people can ask for help (the GitHub issue tracker). Optional. */
+  supportUrl?: string | null;
 }
 
 /** Sample deployment used by the preview server (`npm run email:dev`) and tests. */
@@ -34,7 +34,7 @@ export const previewSite: SiteInfo = {
   name: "Stackcase",
   url: "https://stackcase.vercel.app",
   host: "stackcase.vercel.app",
-  supportEmail: "support@example.com",
+  supportUrl: "https://github.com/ymahrous/stackcase/issues",
 };
 
 export const link = (site: SiteInfo, path: string) =>
