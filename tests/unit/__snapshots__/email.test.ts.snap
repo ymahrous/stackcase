@@ -1,0 +1,133 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`plain-text snapshots > deleted 1`] = `
+"Subject: Your Stackcase account was deleted
+
+Your account was deleted
+
+Hi Ada,
+
+As requested, your account has been deleted, together with your portfolio, projects, skills and sessions.
+
+Portfolio
+
+stackcase.test/ada
+
+Deleted
+
+28 Sep 2026, 07:15 UTC
+
+Copies in backups expire on their normal schedule, as described in our Privacy Policy. Thanks for trying Stackcase. You're welcome back any time.
+
+This is the last email you'll receive from Stackcase about this account.
+
+stackcase.test https://stackcase.test/ · Privacy https://stackcase.test/privacy · Terms https://stackcase.test/terms
+
+© 2026 Stackcase. All rights reserved."
+`;
+
+exports[`plain-text snapshots > password-changed 1`] = `
+"Subject: Your Stackcase password was changed
+
+Your password was changed
+
+Hi Ada,
+
+The password for your account was just changed. For your security, every other device was signed out.
+
+What changed
+
+Password
+
+When
+
+28 Sep 2026, 07:15 UTC
+
+Wasn't you? Reset your password right away. The reset link goes only to this inbox.
+
+Reset my password https://stackcase.test/forgot-password
+
+You're receiving this security notice because it concerns your Stackcase account.
+
+stackcase.test https://stackcase.test/ · Privacy https://stackcase.test/privacy · Terms https://stackcase.test/terms
+
+© 2026 Stackcase. All rights reserved."
+`;
+
+exports[`plain-text snapshots > reset 1`] = `
+"Subject: Reset your Stackcase password
+
+Reset your password
+
+Hi Ada,
+
+We received a request to reset the password for your account. Choose a new one with the button below.
+
+Choose a new password https://stackcase.test/reset-password?token=t
+
+This link works for 60 minutes and can be used once. Didn't ask for this? You can safely ignore this email: your password stays the same, and nobody can change it without this link.
+
+You're receiving this because a password reset was requested for your Stackcase account.
+
+stackcase.test https://stackcase.test/ · Privacy https://stackcase.test/privacy · Terms https://stackcase.test/terms
+
+© 2026 Stackcase. All rights reserved."
+`;
+
+exports[`plain-text snapshots > username-changed 1`] = `
+"Subject: Your portfolio link is now stackcase.test/ada-dev
+
+Your portfolio has a new link
+
+Hi Ada,
+
+Your username was changed. Here is what that means for your portfolio link:
+
+Old address
+
+stackcase.test/ada
+
+New address
+
+stackcase.test/ada-dev
+
+Redirect
+
+30 days from the old address
+
+When
+
+28 Sep 2026, 07:15 UTC
+
+Update your CV, LinkedIn and GitHub profile with the new link. Nobody else can claim your old username while it redirects.
+
+Open my portfolio https://stackcase.test/ada-dev
+
+Wasn't you? Someone may have access to your account. Reset your password https://stackcase.test/forgot-password now.
+
+You're receiving this because the username on your Stackcase account changed.
+
+stackcase.test https://stackcase.test/ · Privacy https://stackcase.test/privacy · Terms https://stackcase.test/terms
+
+© 2026 Stackcase. All rights reserved."
+`;
+
+exports[`plain-text snapshots > verify 1`] = `
+"Subject: Confirm your email for Stackcase
+
+Confirm your email
+
+Hi Ada,
+
+Welcome to Stackcase. Confirm this address so you can always get back into your account, for example to reset a forgotten password.
+
+Confirm my email https://stackcase.test/verify-email?token=t
+
+This link works for 24 hours and can be used once. If you didn't create an account, ignore this email and nothing will happen.
+
+You're receiving this because this address was used to create a Stackcase account.
+
+stackcase.test https://stackcase.test/ · Privacy https://stackcase.test/privacy · Terms https://stackcase.test/terms
+
+© 2026 Stackcase. All rights reserved."
+`;

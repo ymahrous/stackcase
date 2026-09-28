@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: 1
+  # CI builds and tests against a local origin, so portfolios resolve at localhost:3100/<username>.
+  # Production gets its real NEXT_PUBLIC_SITE_URL from the hosting provider.
+  NEXT_PUBLIC_SITE_URL: http://localhost:3100
+  PGPASSWORD: postgres
+  TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/stackcase_test
+  E2E_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/stackcase_e2e
+  SHADOW_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/stackcase_shadow
+
+jobs:
+  verify:
+    name: Lint, typecheck, migrations, tests, build
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Create databases
+        run: for db in stackcase_test stackcase_shadow; do psql -h localhost -U postgres -c "CREATE DATABASE $db"; done
+      - run: npx prisma validate
+      - name: Migrations match the schema
+        run: npx prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema.prisma --exit-code
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - name: Unit and integration tests (real Postgres, coverage thresholds enforced)
+        run: npm run test:coverage
+      - run: npm run build
+
+  e2e:
+    name: End-to-end (Playwright + axe)
+    runs-on: ubuntu-latest
+    needs: verify
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: psql -h localhost -U postgres -c "CREATE DATABASE stackcase_e2e"
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7

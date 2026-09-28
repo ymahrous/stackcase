@@ -1,0 +1,182 @@
+// Data model for the portfolio platform.
+// Usernames and emails are stored lowercased; the app normalizes them before every query.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Availability {
+  OPEN
+  FREELANCE
+  NOT_LOOKING
+}
+
+enum EmailTokenType {
+  VERIFY_EMAIL
+  RESET_PASSWORD
+}
+
+/// Portfolio color theme: follow the visitor's device, or always light or dark.
+enum ColorMode {
+  AUTO
+  LIGHT
+  DARK
+}
+
+/// Heading typeface on the portfolio.
+enum FontStyle {
+  GROTESK
+  SERIF
+  MONO
+}
+
+/// How projects are laid out: long-form case studies, a compact list, or a card grid.
+enum Layout {
+  CASE_STUDY
+  COMPACT
+  GRID
+}
+
+enum SectionOrder {
+  PROJECTS_FIRST
+  SKILLS_FIRST
+}
+
+enum Accent {
+  COBALT
+  EMERALD
+  CRIMSON
+  AMBER
+  VIOLET
+  GRAPHITE
+}
+
+model User {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  passwordHash      String
+  username          String             @unique
+  usernameChangedAt DateTime?
+  emailVerifiedAt   DateTime?
+  /// When the user accepted the Terms and Privacy Policy, and which version (lib/legal.ts LEGAL_VERSION).
+  termsAcceptedAt   DateTime?
+  termsVersion      String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  sessions          Session[]
+  emailTokens       EmailToken[]
+  portfolio         Portfolio?
+  redirects         UsernameRedirect[]
+}
+
+/// Server-side sessions. `id` is the SHA-256 hash of the cookie token, so a database leak exposes no usable tokens.
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Portfolio {
+  id           String       @id @default(cuid())
+  userId       String       @unique
+  displayName  String
+  headline     String       @default("")
+  location     String       @default("")
+  availability Availability @default(OPEN)
+  bio          String       @default("")
+  accent       Accent       @default(COBALT)
+  colorMode    ColorMode    @default(AUTO)
+  fontStyle    FontStyle    @default(GROTESK)
+  layout       Layout       @default(CASE_STUDY)
+  sectionOrder SectionOrder @default(PROJECTS_FIRST)
+  showGlance   Boolean      @default(true)
+  showSkills   Boolean      @default(true)
+  showContact  Boolean      @default(true)
+  pronouns     String       @default("")
+  resumeUrl    String?
+  /// Optional overrides for the search result title and description. Blank means "generate from the profile".
+  seoTitle       String     @default("")
+  seoDescription String     @default("")
+  githubUrl    String?
+  linkedinUrl  String?
+  websiteUrl   String?
+  contactEmail String?
+  published    Boolean      @default(false)
+  publishedAt  DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects     Project[]
+  skills       Skill[]
+
+  @@index([published])
+}
+
+model Project {
+  id          String    @id @default(cuid())
+  portfolioId String
+  position    Int
+  name        String
+  label       String    @default("")
+  tagline     String    @default("")
+  summary     String    @default("")
+  stack       String[]
+  highlights  String[]
+  liveUrl     String?
+  sourceUrl   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId, position])
+}
+
+model Skill {
+  id          String    @id @default(cuid())
+  portfolioId String
+  position    Int
+  area        String
+  tools       String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId, position])
+}
+
+/// A previous username. Visits to the old subdomain 301 to the current one, and nobody else can claim it while the hold lasts.
+model UsernameRedirect {
+  username  String   @id
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// Single-use links sent by email (confirm address, reset password). `id` is the SHA-256 of the token in the link.
+model EmailToken {
+  id        String         @id
+  userId    String
+  type      EmailTokenType
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime       @default(now())
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+}
+
+/// Fixed-window counters for rate limiting (login, sign-up, username checks). Stored in Postgres so limits hold across serverless instances.
+model RateLimit {
+  key     String   @id
+  count   Int
+  resetAt DateTime
+}
